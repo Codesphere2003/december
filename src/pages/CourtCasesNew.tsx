@@ -352,9 +352,8 @@ export default function CourtCases() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All States</SelectItem>
-                <SelectItem value="delhi">Delhi</SelectItem>
-                <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                <SelectItem value="karnataka">Karnataka</SelectItem>
+                <SelectItem value="delhi">Kerala</SelectItem>
+                 
               </SelectContent>
             </Select>
           </div>
@@ -367,9 +366,7 @@ export default function CourtCases() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Districts</SelectItem>
-                <SelectItem value="central">Central Delhi</SelectItem>
-                <SelectItem value="south">South Delhi</SelectItem>
-                <SelectItem value="north">North Delhi</SelectItem>
+                 
               </SelectContent>
             </Select>
           </div>
@@ -382,9 +379,9 @@ export default function CourtCases() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Case Studies</SelectItem>
-                <SelectItem value="heritage">Heritage Protection</SelectItem>
-                <SelectItem value="land">Land Rights</SelectItem>
-                <SelectItem value="religious">Religious Freedom</SelectItem>
+                <SelectItem value="heritage">Completed</SelectItem>
+                <SelectItem value="land">In Court</SelectItem>
+                <SelectItem value="religious">In Progress</SelectItem>
               </SelectContent>
             </Select>
           </div>

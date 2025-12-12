@@ -8,16 +8,14 @@ import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText, Calen
 import { CourtCaseForm } from '@/components/court-cases/CourtCaseForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiClient } from '@/lib/api';
-import { mockApiClient } from '@/lib/mockApi';
+import { firestoreApiClient } from '@/lib/firestoreApi';
 import { CourtCase, CourtCaseFormData } from '@/types/courtCase';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
-// Use mock API if Firebase is not configured
-const isDemoMode = import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project-id';
-const client = isDemoMode ? mockApiClient : apiClient;
+// Use Firestore directly
+const client = firestoreApiClient;
 
 // Court Case Card Component matching the exact reference design
 const CourtCaseCardNew: React.FC<{
@@ -168,6 +166,11 @@ export default function CourtCases() {
   const { user, isAdmin, logout, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
+  // Seed initial data on first load
+  useEffect(() => {
+    client.seedInitialData();
+  }, []);
+
   // State for filters and pagination
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(12);
@@ -198,7 +201,7 @@ export default function CourtCases() {
         sortBy: 'createdAt',
         sortOrder: 'desc',
       }),
-    refetchInterval: isDemoMode ? false : 30000,
+    refetchInterval: 30000,
   });
 
   // Create court case mutation
@@ -362,11 +365,6 @@ export default function CourtCases() {
         {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-orange-600 mb-2">Court Cases</h1>
-          {isDemoMode && (
-            <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-              DEMO MODE
-            </div>
-          )}
         </div>
 
         {/* Filters Row */}

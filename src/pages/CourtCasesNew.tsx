@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 const isDemoMode = import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project-id';
 const client = isDemoMode ? mockApiClient : apiClient;
 
-// Court Case Card Component matching the reference design
+// Court Case Card Component matching the exact reference design
 const CourtCaseCardNew: React.FC<{
   courtCase: CourtCase;
   onEdit?: (courtCase: CourtCase) => void;
@@ -35,101 +35,128 @@ const CourtCaseCardNew: React.FC<{
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusText = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
-      case 'in progress':
-        return 'bg-orange-500 text-white';
-      case 'closed':
-        return 'bg-gray-500 text-white';
+        return 'In Progress';
       case 'pending':
-        return 'bg-yellow-500 text-white';
+        return 'In Progress';
+      case 'closed':
+        return 'Completed';
       default:
-        return 'bg-orange-500 text-white';
+        return 'In Progress';
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-red-600 to-orange-600 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 relative">
-      {/* Status Badge */}
-      <div className="absolute top-4 left-4 z-10">
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(courtCase.status)}`}>
-          {courtCase.status}
-        </span>
-      </div>
-
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-8 left-8 text-6xl">⚖️</div>
-        <div className="absolute top-16 right-8 text-4xl">⚖️</div>
-        <div className="absolute bottom-8 left-16 text-5xl">⚖️</div>
-        <div className="absolute bottom-16 right-16 text-3xl">⚖️</div>
-      </div>
-
-      {/* Content */}
-      <div className="relative p-6 h-80 flex flex-col justify-between">
-        {/* Top Section */}
-        <div>
-          <div className="text-white/80 text-sm mb-2">Case #{courtCase.caseNumber}</div>
-          <h3 className="text-white font-bold text-lg mb-3 line-clamp-2">
-            {courtCase.caseTitle}
-          </h3>
+    <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 max-w-sm mx-auto">
+      {/* Top Red Section with Om Pattern */}
+      <div className="relative bg-red-600 h-64 flex items-center justify-center">
+        {/* Status Badge */}
+        <div className="absolute top-4 right-4 z-10">
+          <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+            {getStatusText(courtCase.status)}
+          </span>
         </div>
 
-        {/* Middle Section */}
-        <div className="flex-1 flex flex-col justify-center">
-          <div className="text-white/90 text-sm space-y-2">
-            {courtCase.courtName && (
-              <div className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                <span className="truncate">{courtCase.courtName}</span>
-              </div>
-            )}
-            {courtCase.judgeName && (
-              <div className="flex items-center gap-2">
-                <Gavel className="h-4 w-4" />
-                <span className="truncate">{courtCase.judgeName}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>Filed: {formatDate(courtCase.dateFiled)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Section */}
-        <div className="flex items-center justify-between">
-          <div className="text-white/80 text-xs">
-            Priority: {courtCase.priority}
+        {/* Om Symbol Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          {/* Large central Om */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="text-8xl text-red-800 font-bold select-none">ॐ</div>
           </div>
           
-          <div className="flex gap-2">
-            {courtCase.pdfFileUrl && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDownload?.(courtCase)}
-                className="text-white hover:bg-white/20 h-8 w-8 p-0"
-              >
-                <FileText className="h-4 w-4" />
-              </Button>
-            )}
-            
-            {showActions && (
-              <>
-                {onEdit && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(courtCase)}
-                    className="text-white hover:bg-white/20 h-8 w-8 p-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                )}
-              </>
-            )}
+          {/* Corner Om symbols */}
+          <div className="absolute top-6 left-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+          <div className="absolute top-6 right-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+          <div className="absolute bottom-6 left-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+          <div className="absolute bottom-6 right-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+        </div>
+
+        {/* "Image Not Available" Text */}
+        <div className="relative z-10 text-center">
+          <div className="text-red-300 text-lg font-medium">
+            Image Not Available
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Cream Section */}
+      <div className="bg-orange-50 p-6">
+        {/* Title */}
+        <h3 className="text-gray-800 font-bold text-lg mb-3 line-clamp-2">
+          {courtCase.caseTitle}
+        </h3>
+
+        {/* Description */}
+        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+          {courtCase.description || `Case filed on ${formatDate(courtCase.dateFiled)} regarding ${courtCase.caseType || 'legal proceedings'}. Court: ${courtCase.courtName || 'District Court'}. Judge: ${courtCase.judgeName || 'Hon. Justice'}...`}
+        </p>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between">
+          <Button 
+            className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center gap-2"
+            onClick={() => {
+              // Show more details or open modal
+              if (onEdit && showActions) {
+                onEdit(courtCase);
+              }
+            }}
+          >
+            Know More
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          {/* Admin Actions */}
+          {showActions && (
+            <div className="flex gap-2">
+              {courtCase.pdfFileUrl && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDownload?.(courtCase)}
+                  className="text-gray-600 hover:text-orange-600 h-8 w-8 p-0"
+                  title="Download PDF"
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
+              )}
+              
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(courtCase)}
+                  className="text-gray-600 hover:text-orange-600 h-8 w-8 p-0"
+                  title="Edit Case"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
+
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(courtCase.id)}
+                  className="text-gray-600 hover:text-red-600 h-8 w-8 p-0"
+                  title="Delete Case"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Case Details */}
+        <div className="mt-4 pt-4 border-t border-orange-200">
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+            <div>Case #: {courtCase.caseNumber}</div>
+            <div>Priority: {courtCase.priority}</div>
+            <div>Filed: {formatDate(courtCase.dateFiled)}</div>
+            <div>Status: {courtCase.status}</div>
           </div>
         </div>
       </div>

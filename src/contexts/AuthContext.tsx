@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+<<<<<<< HEAD
 import { auth, firebaseApi, seedDemoCases } from '@/lib/firebase';
+=======
+import { auth } from '@/lib/firebase';
+>>>>>>> f0e24a90fe166a1340dfe92a24e2fe5cc526c71e
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+<<<<<<< HEAD
     // Seed demo cases on app load
     seedDemoCases().catch(console.error);
 
@@ -44,6 +49,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdmin(false);
       }
       
+=======
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      // For now, any authenticated user is considered admin
+      setIsAdmin(!!user);
+>>>>>>> f0e24a90fe166a1340dfe92a24e2fe5cc526c71e
       setLoading(false);
     });
 

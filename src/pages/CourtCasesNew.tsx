@@ -8,12 +8,22 @@ import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText, Calen
 import { CourtCaseForm } from '@/components/court-cases/CourtCaseForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
+<<<<<<< HEAD
 import { firebaseApi } from '@/lib/firebase';
+=======
+import { firestoreApiClient } from '@/lib/firestoreApi';
+>>>>>>> f0e24a90fe166a1340dfe92a24e2fe5cc526c71e
 import { CourtCase, CourtCaseFormData } from '@/types/courtCase';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
+<<<<<<< HEAD
+=======
+// Use Firestore directly
+const client = firestoreApiClient;
+
+>>>>>>> f0e24a90fe166a1340dfe92a24e2fe5cc526c71e
 // Court Case Card Component matching the exact reference design
 const CourtCaseCardNew: React.FC<{
   courtCase: CourtCase;
@@ -162,6 +172,11 @@ const CourtCaseCardNew: React.FC<{
 export default function CourtCases() {
   const { user, isAdmin, logout, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
+
+  // Seed initial data on first load
+  useEffect(() => {
+    client.seedInitialData();
+  }, []);
 
   // State for filters and pagination
   const [page, setPage] = useState(1);

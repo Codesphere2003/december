@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Scale, ArrowRight } from "lucide-react";
 
 const stats = [
   { number: 44, label: "Total Cases" },
@@ -23,7 +26,7 @@ const CourtCases = () => {
         </h2>
         <div className="w-24 h-1 bg-saffron mx-auto mb-12" />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
               <div
@@ -39,6 +42,24 @@ const CourtCases = () => {
               </p>
             </div>
           ))}
+        </div>
+
+        <div className="text-center">
+          <p className="text-primary-foreground/80 mb-6 max-w-2xl mx-auto">
+            Access detailed information about ongoing court cases, legal documents, and case status updates. 
+            Our comprehensive case management system provides transparency and easy access to legal proceedings.
+          </p>
+          <Link to="/court-cases">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="bg-transparent border-saffron text-saffron hover:bg-saffron hover:text-dark-section transition-all duration-300"
+            >
+              <Scale className="mr-2 h-5 w-5" />
+              View All Court Cases
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Court cases collection - read access for all, write access for authenticated admins
+    match /courtCases/{document} {
+      allow read: if true; // Public read access for court cases
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Default rule - deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

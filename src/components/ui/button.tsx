@@ -15,11 +15,18 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // SaveDeities custom variants
+        saffron: "bg-saffron text-primary-foreground hover:bg-saffron-dark font-semibold uppercase tracking-wider",
+        saffronOutline: "border-2 border-saffron text-saffron bg-transparent hover:bg-saffron hover:text-primary-foreground font-semibold uppercase tracking-wider",
+        hero: "bg-saffron text-primary-foreground hover:bg-saffron-dark font-semibold uppercase tracking-wider",
+        nav: "bg-transparent text-foreground hover:text-saffron font-medium",
+        navActive: "bg-saffron text-primary-foreground rounded-full font-medium",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
+        xl: "h-14 rounded-md px-10 text-base",
         icon: "h-10 w-10",
       },
     },

@@ -8,16 +8,11 @@ import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText, Calen
 import { CourtCaseForm } from '@/components/court-cases/CourtCaseForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiClient } from '@/lib/api';
-import { mockApiClient } from '@/lib/mockApi';
+import { firebaseApi } from '@/lib/firebase';
 import { CourtCase, CourtCaseFormData } from '@/types/courtCase';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-
-// Use mock API if Firebase is not configured
-const isDemoMode = import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project-id';
-const client = isDemoMode ? mockApiClient : apiClient;
 
 // Court Case Card Component matching the exact reference design
 const CourtCaseCardNew: React.FC<{
@@ -190,7 +185,7 @@ export default function CourtCases() {
   } = useQuery({
     queryKey: ['courtCases', page, limit, search, status],
     queryFn: () =>
-      client.getCourtCases({
+      firebaseApi.getCourtCases({
         page,
         limit,
         search: search || undefined,
@@ -198,13 +193,13 @@ export default function CourtCases() {
         sortBy: 'createdAt',
         sortOrder: 'desc',
       }),
-    refetchInterval: isDemoMode ? false : 30000,
+    refetchInterval: 30000,
   });
 
   // Create court case mutation
   const createMutation = useMutation({
     mutationFn: ({ data, file }: { data: CourtCaseFormData; file?: File }) =>
-      client.createCourtCase(data, file),
+      firebaseApi.createCourtCase(data, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courtCases'] });
       setShowForm(false);
@@ -225,7 +220,7 @@ export default function CourtCases() {
       id: string;
       data: CourtCaseFormData;
       file?: File;
-    }) => client.updateCourtCase(id, data, file),
+    }) => firebaseApi.updateCourtCase(id, data, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courtCases'] });
       setShowForm(false);
@@ -239,7 +234,7 @@ export default function CourtCases() {
 
   // Delete court case mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => client.deleteCourtCase(id),
+    mutationFn: (id: string) => firebaseApi.deleteCourtCase(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courtCases'] });
       toast.success('Court case deleted successfully');
@@ -362,11 +357,6 @@ export default function CourtCases() {
         {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-orange-600 mb-2">Court Cases</h1>
-          {isDemoMode && (
-            <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-              DEMO MODE
-            </div>
-          )}
         </div>
 
         {/* Filters Row */}

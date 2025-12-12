@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { apiClient } from '@/lib/api';
-import { mockApiClient } from '@/lib/mockApi';
-
-// Use mock API if Firebase is not configured
-const isDemoMode = import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project-id';
-const client = isDemoMode ? mockApiClient : apiClient;
+import { auth, firebaseApi, seedDemoCases } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -32,18 +26,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isDemoMode) {
-      // Demo mode - simulate authentication
-      setLoading(false);
-      return;
-    }
+    // Seed demo cases on app load
+    seedDemoCases().catch(console.error);
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       
       if (user) {
         try {
-          const result = await client.verifyToken();
+          const result = await firebaseApi.verifyToken();
           setIsAdmin(result.user?.admin || false);
         } catch (error) {
           console.error('Error verifying admin status:', error);
@@ -60,23 +51,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    if (isDemoMode) {
-      await client.login(email, password);
-      setUser({ email } as User);
-      setIsAdmin(true);
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {
-    if (isDemoMode) {
-      await client.logout();
-      setUser(null);
-      setIsAdmin(false);
-    } else {
-      await signOut(auth);
-    }
+    await signOut(auth);
   };
 
   const value = {

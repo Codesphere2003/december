@@ -10,18 +10,22 @@ import { CourtCaseFilters } from '@/components/court-cases/CourtCaseFilters';
 import { CourtCasesPagination } from '@/components/court-cases/CourtCasesPagination';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiClient } from '@/lib/api';
-import { mockApiClient } from '@/lib/mockApi';
+import { firestoreApiClient } from '@/lib/firestoreApi';
 import { CourtCase, CourtCaseFormData } from '@/types/courtCase';
-
-// Use mock API if Firebase is not configured
-const isDemoMode = import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project-id';
-const client = isDemoMode ? mockApiClient : apiClient;
 import { toast } from 'sonner';
+
+// Use Firestore directly
+const client = firestoreApiClient;
+const isDemoMode = false;
 
 export default function CourtCases() {
   const { user, isAdmin, logout, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
+
+  // Seed initial data on first load
+  useEffect(() => {
+    client.seedInitialData();
+  }, []);
 
   // State for filters and pagination
   const [page, setPage] = useState(1);

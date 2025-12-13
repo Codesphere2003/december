@@ -53,8 +53,8 @@ export default function CourtCases() {
 
   // Create court case mutation
   const createMutation = useMutation({
-    mutationFn: ({ data, file }: { data: CourtCaseFormData; file?: File }) =>
-      firebaseApi.createCourtCase(data, file),
+    mutationFn: ({ data, imageFile }: { data: CourtCaseFormData; imageFile?: File }) =>
+      firebaseApi.createCourtCase(data, imageFile),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courtCases'] });
       setShowForm(false);
@@ -70,12 +70,12 @@ export default function CourtCases() {
     mutationFn: ({
       id,
       data,
-      file,
+      imageFile,
     }: {
       id: string;
       data: CourtCaseFormData;
-      file?: File;
-    }) => firebaseApi.updateCourtCase(id, data, file),
+      imageFile?: File;
+    }) => firebaseApi.updateCourtCase(id, data, imageFile),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courtCases'] });
       setShowForm(false);
@@ -104,11 +104,11 @@ export default function CourtCases() {
     setPage(1);
   }, [search, status, sortBy, sortOrder]);
 
-  const handleFormSubmit = async (data: CourtCaseFormData, file?: File) => {
+  const handleFormSubmit = async (data: CourtCaseFormData, imageFile?: File) => {
     if (editingCase) {
-      await updateMutation.mutateAsync({ id: editingCase.id, data, file });
+      await updateMutation.mutateAsync({ id: editingCase.id, data, imageFile });
     } else {
-      await createMutation.mutateAsync({ data, file });
+      await createMutation.mutateAsync({ data, imageFile });
     }
   };
 

@@ -14,21 +14,14 @@ import { CourtCase, CourtCaseFormData } from '@/types/courtCase';
 
 const courtCaseSchema = z.object({
   caseTitle: z.string().min(1, 'Case title is required'),
-  caseNumber: z.string().min(1, 'Case number is required'),
   description: z.string().optional(),
   dateFiled: z.string().min(1, 'Date filed is required'),
   status: z.string().min(1, 'Status is required'),
-  courtName: z.string().optional(),
-  judgeName: z.string().optional(),
-  plaintiff: z.string().optional(),
-  defendant: z.string().optional(),
-  caseType: z.string().optional(),
-  priority: z.string().min(1, 'Priority is required'),
 });
 
 interface CourtCaseFormProps {
   courtCase?: CourtCase;
-  onSubmit: (data: CourtCaseFormData, file?: File) => Promise<void>;
+  onSubmit: (data: CourtCaseFormData, imageFile?: File) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -40,7 +33,7 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
   isLoading = false,
 }) => {
   const [error, setError] = useState<string>('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const isEditing = !!courtCase;
@@ -56,16 +49,9 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
     resolver: zodResolver(courtCaseSchema),
     defaultValues: {
       caseTitle: '',
-      caseNumber: '',
       description: '',
       dateFiled: '',
       status: 'Active',
-      courtName: '',
-      judgeName: '',
-      plaintiff: '',
-      defendant: '',
-      caseType: '',
-      priority: 'Medium',
     },
   });
 
@@ -73,16 +59,9 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
     if (courtCase) {
       reset({
         caseTitle: courtCase.caseTitle,
-        caseNumber: courtCase.caseNumber,
         description: courtCase.description || '',
         dateFiled: courtCase.dateFiled,
         status: courtCase.status,
-        courtName: courtCase.courtName || '',
-        judgeName: courtCase.judgeName || '',
-        plaintiff: courtCase.plaintiff || '',
-        defendant: courtCase.defendant || '',
-        caseType: courtCase.caseType || '',
-        priority: courtCase.priority,
       });
     }
   }, [courtCase, reset]);
@@ -90,24 +69,24 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
   const handleFormSubmit = async (data: CourtCaseFormData) => {
     try {
       setError('');
-      await onSubmit(data, selectedFile || undefined);
+      await onSubmit(data, selectedImageFile || undefined);
     } catch (error: any) {
       setError(error.message || 'Failed to save court case');
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Only PDF files are allowed');
+      if (!file.type.startsWith('image/')) {
+        setError('Only image files are allowed');
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        setError('File size must be less than 10MB');
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
         return;
       }
-      setSelectedFile(file);
+      setSelectedImageFile(file);
       setError('');
     }
   };
@@ -129,21 +108,21 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
 
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Only PDF files are allowed');
+      if (!file.type.startsWith('image/')) {
+        setError('Only image files are allowed');
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        setError('File size must be less than 10MB');
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
         return;
       }
-      setSelectedFile(file);
+      setSelectedImageFile(file);
       setError('');
     }
   };
 
-  const removeFile = () => {
-    setSelectedFile(null);
+  const removeImageFile = () => {
+    setSelectedImageFile(null);
   };
 
   return (
@@ -167,25 +146,12 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
               <Label htmlFor="caseTitle">Case Title *</Label>
               <Input
                 id="caseTitle"
-                placeholder="Enter case title"
+                placeholder="Enter temple/case name"
                 {...register('caseTitle')}
                 disabled={isLoading}
               />
               {errors.caseTitle && (
                 <p className="text-sm text-destructive">{errors.caseTitle.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="caseNumber">Case Number *</Label>
-              <Input
-                id="caseNumber"
-                placeholder="Enter case number"
-                {...register('caseNumber')}
-                disabled={isLoading}
-              />
-              {errors.caseNumber && (
-                <p className="text-sm text-destructive">{errors.caseNumber.message}</p>
               )}
             </div>
 
@@ -202,7 +168,7 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="status">Status *</Label>
               <Select
                 value={watch('status')}
@@ -213,87 +179,17 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Closed">Closed</SelectItem>
-                  <SelectItem value="Dismissed">Dismissed</SelectItem>
+                  <SelectItem value="Dismissed">In Court</SelectItem>
                   <SelectItem value="Settled">Settled</SelectItem>
                 </SelectContent>
               </Select>
               {errors.status && (
                 <p className="text-sm text-destructive">{errors.status.message}</p>
               )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority *</Label>
-              <Select
-                value={watch('priority')}
-                onValueChange={(value) => setValue('priority', value)}
-                disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="High">High</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="Low">Low</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.priority && (
-                <p className="text-sm text-destructive">{errors.priority.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="caseType">Case Type</Label>
-              <Input
-                id="caseType"
-                placeholder="e.g., Civil, Criminal, Family"
-                {...register('caseType')}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="courtName">Court Name</Label>
-              <Input
-                id="courtName"
-                placeholder="Enter court name"
-                {...register('courtName')}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="judgeName">Judge Name</Label>
-              <Input
-                id="judgeName"
-                placeholder="Enter judge name"
-                {...register('judgeName')}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="plaintiff">Plaintiff</Label>
-              <Input
-                id="plaintiff"
-                placeholder="Enter plaintiff name"
-                {...register('plaintiff')}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="defendant">Defendant</Label>
-              <Input
-                id="defendant"
-                placeholder="Enter defendant name"
-                {...register('defendant')}
-                disabled={isLoading}
-              />
             </div>
           </div>
 
@@ -308,9 +204,9 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
             />
           </div>
 
-          {/* File Upload */}
+          {/* Image Upload */}
           <div className="space-y-2">
-            <Label>PDF Document</Label>
+            <Label>Temple Image</Label>
             <div
               className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
                 dragActive
@@ -322,51 +218,67 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
               onDragOver={handleDrag}
               onDrop={handleDrop}
             >
-              {selectedFile ? (
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm font-medium">{selectedFile.name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeFile}
-                    disabled={isLoading}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+              {selectedImageFile ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <span className="text-sm font-medium">{selectedImageFile.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeImageFile}
+                      disabled={isLoading}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <img
+                    src={URL.createObjectURL(selectedImageFile)}
+                    alt="Preview"
+                    className="mx-auto h-32 w-auto rounded-lg object-cover"
+                  />
                 </div>
               ) : (
                 <div>
                   <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-sm text-gray-600 mb-2">
-                    Drag and drop a PDF file here, or click to select
+                    Drag and drop an image here, or click to select
                   </p>
                   <input
                     type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
+                    accept="image/*"
+                    onChange={handleImageChange}
                     className="hidden"
-                    id="file-upload"
+                    id="image-upload"
                     disabled={isLoading}
                   />
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => document.getElementById('file-upload')?.click()}
+                    onClick={() => document.getElementById('image-upload')?.click()}
                     disabled={isLoading}
                   >
-                    Select PDF File
+                    Select Image
                   </Button>
                   <p className="text-xs text-gray-500 mt-2">
-                    Maximum file size: 10MB
+                    Maximum file size: 5MB (JPG, PNG, WebP)
                   </p>
                 </div>
               )}
             </div>
-            {isEditing && courtCase?.pdfFileName && !selectedFile && (
-              <p className="text-sm text-gray-600">
-                Current file: {courtCase.pdfFileName}
-              </p>
+            {isEditing && courtCase?.imageName && !selectedImageFile && (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">
+                  Current image: {courtCase.imageName}
+                </p>
+                {courtCase.imageUrl && (
+                  <img
+                    src={courtCase.imageUrl}
+                    alt="Current"
+                    className="h-32 w-auto rounded-lg object-cover"
+                  />
+                )}
+              </div>
             )}
           </div>
 

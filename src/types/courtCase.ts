@@ -13,22 +13,17 @@ export interface CourtCase {
   priority: string;
   pdfFileUrl?: string;
   pdfFileName?: string;
+  imageUrl?: string;
+  imageName?: string;
   createdAt: any;
   updatedAt: any;
 }
 
 export interface CourtCaseFormData {
   caseTitle: string;
-  caseNumber: string;
   description?: string;
   dateFiled: string;
   status: string;
-  courtName?: string;
-  judgeName?: string;
-  plaintiff?: string;
-  defendant?: string;
-  caseType?: string;
-  priority: string;
 }
 
 export interface CourtCasesResponse {

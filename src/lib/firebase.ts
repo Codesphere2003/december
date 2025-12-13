@@ -54,6 +54,8 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     priority: 'High',
     pdfFileUrl: 'https://example.com/case1.pdf',
     pdfFileName: 'Petition_CWP-2024-001.pdf',
+    imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&h=300&fit=crop',
+    imageName: 'temple1.jpg',
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-12-10'),
   },
@@ -71,6 +73,8 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     priority: 'High',
     pdfFileUrl: 'https://example.com/case2.pdf',
     pdfFileName: 'SLP_Heritage_Protection.pdf',
+    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+    imageName: 'heritage_temple.jpg',
     createdAt: new Date('2024-02-20'),
     updatedAt: new Date('2024-12-08'),
   },
@@ -79,7 +83,7 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     caseNumber: 'CA-2024-003',
     description: 'Appeal for fair compensation for temple land acquired for public infrastructure development.',
     dateFiled: '2024-03-10',
-    status: 'Closed',
+    status: 'In Progress',
     courtName: 'District Court',
     judgeName: 'Hon. Justice S.P. Singh',
     plaintiff: 'Temple Management Committee',
@@ -88,6 +92,8 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     priority: 'Medium',
     pdfFileUrl: 'https://example.com/case3.pdf',
     pdfFileName: 'Land_Compensation_Appeal.pdf',
+    imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&h=300&fit=crop',
+    imageName: 'temple_land.jpg',
     createdAt: new Date('2024-03-10'),
     updatedAt: new Date('2024-11-15'),
   },
@@ -105,6 +111,8 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     priority: 'High',
     pdfFileUrl: 'https://example.com/case4.pdf',
     pdfFileName: 'Religious_Freedom_PIL.pdf',
+    imageUrl: 'https://images.unsplash.com/photo-1605379399642-870262d3d051?w=400&h=300&fit=crop',
+    imageName: 'temple_worship.jpg',
     createdAt: new Date('2024-04-05'),
     updatedAt: new Date('2024-12-12'),
   },
@@ -113,13 +121,15 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     caseNumber: 'NGT-2024-005',
     description: 'Challenge to environmental clearance granted for construction activities near the temple complex.',
     dateFiled: '2024-05-18',
-    status: 'Pending',
+    status: 'In Progress',
     courtName: 'National Green Tribunal',
     judgeName: 'Hon. Justice Environmental Panel',
     plaintiff: 'Environmental Protection Group',
     defendant: 'Project Developer',
     caseType: 'Environmental Appeal',
     priority: 'Medium',
+    imageUrl: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=400&h=300&fit=crop',
+    imageName: 'temple_environment.jpg',
     createdAt: new Date('2024-05-18'),
     updatedAt: new Date('2024-12-01'),
   },
@@ -128,7 +138,7 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     caseNumber: 'WP-2024-006',
     description: 'Writ petition regarding archaeological survey findings and their impact on temple operations.',
     dateFiled: '2024-06-22',
-    status: 'Active',
+    status: 'Dismissed',
     courtName: 'High Court of Justice',
     judgeName: 'Hon. Justice Cultural Heritage Bench',
     plaintiff: 'Archaeological Society',
@@ -137,6 +147,8 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     priority: 'Low',
     pdfFileUrl: 'https://example.com/case6.pdf',
     pdfFileName: 'Archaeological_Survey_Dispute.pdf',
+    imageUrl: 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=400&h=300&fit=crop',
+    imageName: 'temple_archaeology.jpg',
     createdAt: new Date('2024-06-22'),
     updatedAt: new Date('2024-11-30'),
   },
@@ -160,6 +172,8 @@ const docToCourtCase = (docSnap: any): CourtCase => {
     priority: data.priority,
     pdfFileUrl: data.pdfFileUrl,
     pdfFileName: data.pdfFileName,
+    imageUrl: data.imageUrl,
+    imageName: data.imageName,
     createdAt: data.createdAt?.toDate?.() || data.createdAt,
     updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
   };
@@ -251,38 +265,35 @@ export const firebaseApi = {
   },
 
   // Create new court case
-  async createCourtCase(data: CourtCaseFormData, file?: File): Promise<{ message: string; id: string }> {
+  async createCourtCase(data: CourtCaseFormData, imageFile?: File): Promise<{ message: string; id: string }> {
     const casesRef = collection(db, CASES_COLLECTION);
     
-    // Check if case number already exists
-    const existingQuery = query(casesRef, where('caseNumber', '==', data.caseNumber));
-    const existingSnapshot = await getDocs(existingQuery);
-    
-    if (!existingSnapshot.empty) {
-      throw new Error('Case number already exists');
-    }
+    // Generate a unique case number
+    const caseNumber = `CASE-${Date.now()}`;
 
-    let pdfFileUrl: string | undefined;
-    let pdfFileName: string | undefined;
+    let imageUrl: string | undefined;
+    let imageName: string | undefined;
 
     // Create the document first to get the ID
     const docRef = await addDoc(casesRef, {
       ...data,
+      caseNumber,
+      priority: 'Medium', // Default priority
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
 
-    // Upload file if provided
-    if (file) {
-      const fileRef = ref(storage, `court-cases/${docRef.id}/${file.name}`);
-      await uploadBytes(fileRef, file);
-      pdfFileUrl = await getDownloadURL(fileRef);
-      pdfFileName = file.name;
+    // Upload image if provided
+    if (imageFile) {
+      const imageRef = ref(storage, `court-cases/images/${docRef.id}/${imageFile.name}`);
+      await uploadBytes(imageRef, imageFile);
+      imageUrl = await getDownloadURL(imageRef);
+      imageName = imageFile.name;
 
-      // Update document with file info
+      // Update document with image info
       await updateDoc(docRef, {
-        pdfFileUrl,
-        pdfFileName,
+        imageUrl,
+        imageName,
       });
     }
 
@@ -290,7 +301,7 @@ export const firebaseApi = {
   },
 
   // Update existing court case
-  async updateCourtCase(id: string, data: CourtCaseFormData, file?: File): Promise<{ message: string }> {
+  async updateCourtCase(id: string, data: CourtCaseFormData, imageFile?: File): Promise<{ message: string }> {
     const docRef = doc(db, CASES_COLLECTION, id);
     const docSnap = await getDoc(docRef);
 
@@ -298,27 +309,17 @@ export const firebaseApi = {
       throw new Error('Court case not found');
     }
 
-    // Check if case number already exists (excluding current case)
-    const casesRef = collection(db, CASES_COLLECTION);
-    const existingQuery = query(casesRef, where('caseNumber', '==', data.caseNumber));
-    const existingSnapshot = await getDocs(existingQuery);
-    
-    const existingCase = existingSnapshot.docs.find(d => d.id !== id);
-    if (existingCase) {
-      throw new Error('Case number already exists');
-    }
-
     const updateData: any = {
       ...data,
       updatedAt: Timestamp.now(),
     };
 
-    // Upload new file if provided
-    if (file) {
-      const fileRef = ref(storage, `court-cases/${id}/${file.name}`);
-      await uploadBytes(fileRef, file);
-      updateData.pdfFileUrl = await getDownloadURL(fileRef);
-      updateData.pdfFileName = file.name;
+    // Upload new image if provided
+    if (imageFile) {
+      const imageRef = ref(storage, `court-cases/images/${id}/${imageFile.name}`);
+      await uploadBytes(imageRef, imageFile);
+      updateData.imageUrl = await getDownloadURL(imageRef);
+      updateData.imageName = imageFile.name;
     }
 
     await updateDoc(docRef, updateData);
@@ -335,14 +336,14 @@ export const firebaseApi = {
       throw new Error('Court case not found');
     }
 
-    // Try to delete associated file
+    // Try to delete associated image
     const data = docSnap.data();
-    if (data.pdfFileName) {
+    if (data.imageName) {
       try {
-        const fileRef = ref(storage, `court-cases/${id}/${data.pdfFileName}`);
-        await deleteObject(fileRef);
+        const imageRef = ref(storage, `court-cases/images/${id}/${data.imageName}`);
+        await deleteObject(imageRef);
       } catch (error) {
-        console.warn('Failed to delete file:', error);
+        console.warn('Failed to delete image:', error);
       }
     }
 

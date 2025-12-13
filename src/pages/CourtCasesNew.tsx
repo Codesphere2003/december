@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText, Edit, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText, Edit, Trash2, Search } from 'lucide-react';
 import { CourtCaseForm } from '@/components/court-cases/CourtCaseForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,8 +38,8 @@ const CourtCaseCardNew: React.FC<{
 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 max-w-sm mx-auto">
-      {/* Top Red Section with Om Pattern */}
-      <div className="relative bg-red-600 h-64 flex items-center justify-center">
+      {/* Image Section */}
+      <div className="relative h-64 bg-gray-100">
         {/* Status Badge */}
         <div className="absolute top-4 right-4 z-10">
           <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
@@ -46,20 +47,32 @@ const CourtCaseCardNew: React.FC<{
           </span>
         </div>
 
-        {/* Om Symbol Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="text-8xl text-red-800 font-bold select-none">ॐ</div>
-          </div>
-          <div className="absolute top-6 left-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
-          <div className="absolute top-6 right-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
-          <div className="absolute bottom-6 left-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
-          <div className="absolute bottom-6 right-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
-        </div>
+        {courtCase.imageUrl ? (
+          /* Display uploaded image */
+          <img
+            src={courtCase.imageUrl}
+            alt={courtCase.caseTitle}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          /* Fallback with Om Pattern */
+          <div className="relative bg-red-600 h-full flex items-center justify-center">
+            {/* Om Symbol Pattern */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div className="text-8xl text-red-800 font-bold select-none">ॐ</div>
+              </div>
+              <div className="absolute top-6 left-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+              <div className="absolute top-6 right-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+              <div className="absolute bottom-6 left-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+              <div className="absolute bottom-6 right-6 text-3xl text-red-800 font-bold select-none">ॐ</div>
+            </div>
 
-        <div className="relative z-10 text-center">
-          <div className="text-red-300 text-lg font-medium">Image Not Available</div>
-        </div>
+            <div className="relative z-10 text-center">
+              <div className="text-red-300 text-lg font-medium">Image Not Available</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom Cream Section */}
@@ -111,7 +124,7 @@ export default function CourtCases() {
 
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
-  const [search] = useState('');
+  const [search, setSearch] = useState('');
   const [status] = useState('all');
   const [district, setDistrict] = useState('all');
   const [caseStudy, setCaseStudy] = useState('all');
@@ -142,6 +155,11 @@ export default function CourtCases() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['courtCases'] }); toast.success('Court case deleted successfully'); },
     onError: (error: any) => { toast.error(error.message || 'Failed to delete court case'); },
   });
+
+  // Reset page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const handleFormSubmit = async (data: CourtCaseFormData, file?: File) => {
     if (editingCase) { await updateMutation.mutateAsync({ id: editingCase.id, data, file }); }
@@ -234,6 +252,19 @@ export default function CourtCases() {
                 Update Status
               </Button>
             )}
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search court cases..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+            />
           </div>
         </div>
 

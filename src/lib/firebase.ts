@@ -14,7 +14,7 @@ import {
   orderBy,
   Timestamp,
 } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+// Firebase Storage imports removed - using local backend instead
 import { CourtCase, CourtCaseFormData, CourtCasesResponse } from '@/types/courtCase';
 
 // Firebase configuration
@@ -34,7 +34,6 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 
 const CASES_COLLECTION = 'cases';
 
@@ -274,28 +273,41 @@ export const firebaseApi = {
     let imageUrl: string | undefined;
     let imageName: string | undefined;
 
-    // Create the document first to get the ID
+    // Upload image to local backend if provided
+    if (imageFile) {
+      try {
+        const formData = new FormData();
+        formData.append('photo', imageFile);
+        
+        const response = await fetch('http://localhost:5000/api/court-cases/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          imageUrl = result.url;
+          imageName = result.filename;
+        } else {
+          throw new Error(result.error || 'Failed to upload image');
+        }
+      } catch (error) {
+        console.error('Image upload error:', error);
+        throw new Error('Failed to upload image to server');
+      }
+    }
+
+    // Create the document with image info
     const docRef = await addDoc(casesRef, {
       ...data,
       caseNumber,
       priority: 'Medium', // Default priority
+      imageUrl,
+      imageName,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
-
-    // Upload image if provided
-    if (imageFile) {
-      const imageRef = ref(storage, `court-cases/images/${docRef.id}/${imageFile.name}`);
-      await uploadBytes(imageRef, imageFile);
-      imageUrl = await getDownloadURL(imageRef);
-      imageName = imageFile.name;
-
-      // Update document with image info
-      await updateDoc(docRef, {
-        imageUrl,
-        imageName,
-      });
-    }
 
     return { message: 'Court case created successfully', id: docRef.id };
   },
@@ -314,12 +326,29 @@ export const firebaseApi = {
       updatedAt: Timestamp.now(),
     };
 
-    // Upload new image if provided
+    // Upload new image to local backend if provided
     if (imageFile) {
-      const imageRef = ref(storage, `court-cases/images/${id}/${imageFile.name}`);
-      await uploadBytes(imageRef, imageFile);
-      updateData.imageUrl = await getDownloadURL(imageRef);
-      updateData.imageName = imageFile.name;
+      try {
+        const formData = new FormData();
+        formData.append('photo', imageFile);
+        
+        const response = await fetch('http://localhost:5000/api/court-cases/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          updateData.imageUrl = result.url;
+          updateData.imageName = result.filename;
+        } else {
+          throw new Error(result.error || 'Failed to upload image');
+        }
+      } catch (error) {
+        console.error('Image upload error:', error);
+        throw new Error('Failed to upload image to server');
+      }
     }
 
     await updateDoc(docRef, updateData);
@@ -336,16 +365,8 @@ export const firebaseApi = {
       throw new Error('Court case not found');
     }
 
-    // Try to delete associated image
-    const data = docSnap.data();
-    if (data.imageName) {
-      try {
-        const imageRef = ref(storage, `court-cases/images/${id}/${data.imageName}`);
-        await deleteObject(imageRef);
-      } catch (error) {
-        console.warn('Failed to delete image:', error);
-      }
-    }
+    // Note: Local backend images are not automatically deleted
+    // You may want to implement a cleanup endpoint if needed
 
     await deleteDoc(docRef);
 

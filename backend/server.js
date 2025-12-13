@@ -5,10 +5,18 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:8081',
+    process.env.FRONTEND_URL || 'https://your-frontend-domain.com'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Create photos directory if it doesn't exist
@@ -61,10 +69,22 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Court Cases Image Upload Server',
     status: 'running',
+    environment: process.env.NODE_ENV || 'development',
+    port: PORT,
     endpoints: {
       upload: 'POST /api/court-cases/upload',
-      photos: 'GET /photos/:filename'
+      photos: 'GET /photos/:filename',
+      health: 'GET /health'
     }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
 });
 
@@ -80,7 +100,8 @@ app.post('/api/court-cases/upload', upload.single('photo'), (req, res) => {
     }
 
     // Generate public URL for the uploaded image
-    const publicUrl = `http://localhost:${PORT}/photos/${req.file.filename}`;
+    const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+    const publicUrl = `${baseUrl}/photos/${req.file.filename}`;
 
     // Return success response
     res.json({

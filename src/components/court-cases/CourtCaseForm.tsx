@@ -183,7 +183,7 @@ export const CourtCaseForm: React.FC<CourtCaseFormProps> = ({
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Closed">Closed</SelectItem>
-                  <SelectItem value="Dismissed">In Court</SelectItem>
+                  <SelectItem value="In Court">In Court</SelectItem>
                   <SelectItem value="Settled">Settled</SelectItem>
                 </SelectContent>
               </Select>

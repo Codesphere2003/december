@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText } from 'lucide-react';
+import { Loader2, Plus, Scale, LogOut, User, Home, ChevronRight, FileText, Edit, Trash2 } from 'lucide-react';
 import { CourtCaseForm } from '@/components/court-cases/CourtCaseForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,16 +31,8 @@ const CourtCaseCardNew: React.FC<{
   };
 
   const getStatusText = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return 'In Progress';
-      case 'pending':
-        return 'In Progress';
-      case 'closed':
-        return 'Completed';
-      default:
-        return 'In Progress';
-    }
+    // Return the actual status instead of mapping everything to "In Progress"
+    return status;
   };
 
   return (
@@ -95,26 +87,19 @@ const CourtCaseCardNew: React.FC<{
               )}
               {onEdit && (
                 <Button variant="ghost" size="sm" onClick={() => onEdit(courtCase)} className="text-gray-600 hover:text-orange-600 h-8 w-8 p-0" title="Edit Case">
-                  <Plus className="h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                 </Button>
               )}
               {onDelete && (
                 <Button variant="ghost" size="sm" onClick={() => onDelete(courtCase.id)} className="text-gray-600 hover:text-red-600 h-8 w-8 p-0" title="Delete Case">
-                  <LogOut className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>
           )}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-orange-200">
-          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-            <div>Case #: {courtCase.caseNumber}</div>
-            <div>Priority: {courtCase.priority}</div>
-            <div>Filed: {formatDate(courtCase.dateFiled)}</div>
-            <div>Status: {courtCase.status}</div>
-          </div>
-        </div>
+
       </div>
     </div>
   );
@@ -229,7 +214,27 @@ export default function CourtCases() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-orange-600 mb-2">Court Cases</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-4xl font-bold text-orange-600 mb-2">Court Cases</h1>
+            {isAdmin && (
+              <Button 
+                onClick={async () => {
+                  try {
+                    await firebaseApi.updateDismissedToInCourt();
+                    toast.success('Updated all "Dismissed" cases to "In Court"');
+                    refetch();
+                  } catch (error) {
+                    toast.error('Failed to update cases');
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="text-xs"
+              >
+                Update Status
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">

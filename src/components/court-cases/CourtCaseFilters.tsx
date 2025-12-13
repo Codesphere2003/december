@@ -52,7 +52,7 @@ export const CourtCaseFilters: React.FC<CourtCaseFiltersProps> = ({
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
               <SelectItem value="Closed">Closed</SelectItem>
-              <SelectItem value="Dismissed">Dismissed</SelectItem>
+              <SelectItem value="In Court">In Court</SelectItem>
               <SelectItem value="Settled">Settled</SelectItem>
             </SelectContent>
           </Select>

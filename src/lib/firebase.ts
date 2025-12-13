@@ -138,7 +138,7 @@ const demoCases: Omit<CourtCase, 'id'>[] = [
     caseNumber: 'WP-2024-006',
     description: 'Writ petition regarding archaeological survey findings and their impact on temple operations.',
     dateFiled: '2024-06-22',
-    status: 'Dismissed',
+    status: 'In Court',
     courtName: 'High Court of Justice',
     judgeName: 'Hon. Justice Cultural Heritage Bench',
     plaintiff: 'Archaeological Society',
@@ -350,6 +350,20 @@ export const firebaseApi = {
     await deleteDoc(docRef);
 
     return { message: 'Court case deleted successfully' };
+  },
+
+  // Update status from "Dismissed" to "In Court" (temporary function)
+  async updateDismissedToInCourt(): Promise<void> {
+    const casesRef = collection(db, CASES_COLLECTION);
+    const dismissedQuery = query(casesRef, where('status', '==', 'Dismissed'));
+    const snapshot = await getDocs(dismissedQuery);
+    
+    const updatePromises = snapshot.docs.map(doc => 
+      updateDoc(doc.ref, { status: 'In Court' })
+    );
+    
+    await Promise.all(updatePromises);
+    console.log('Updated all "Dismissed" cases to "In Court"');
   },
 
   // Verify token (for auth compatibility)

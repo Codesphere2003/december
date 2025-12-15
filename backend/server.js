@@ -5,7 +5,10 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
+// Base URL for serving images (use environment variable in production)
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 // Middleware
 app.use(cors());
@@ -80,7 +83,7 @@ app.post('/api/court-cases/upload', upload.single('photo'), (req, res) => {
     }
 
     // Generate public URL for the uploaded image
-    const publicUrl = `http://localhost:${PORT}/photos/${req.file.filename}`;
+    const publicUrl = `${BASE_URL}/photos/${req.file.filename}`;
 
     // Return success response
     res.json({
@@ -136,9 +139,9 @@ app.use('*', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Court Cases Backend Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Court Cases Backend Server running on port ${PORT}`);
   console.log(`📁 Photos will be stored in: ${photosDir}`);
-  console.log(`🖼️  Access photos at: http://localhost:${PORT}/photos/[filename]`);
+  console.log(`🖼️  Access photos at: ${BASE_URL}/photos/[filename]`);
 });
 
 module.exports = app;

@@ -273,13 +273,13 @@ export const firebaseApi = {
     let imageUrl: string | undefined;
     let imageName: string | undefined;
 
-    // Upload image to local backend if provided
+    // Upload image to backend if provided
     if (imageFile) {
       try {
         const formData = new FormData();
         formData.append('photo', imageFile);
         
-        const response = await fetch('http://localhost:5000/api/court-cases/upload', {
+        const response = await fetch('https://savedieties.onrender.com/api/court-cases/upload', {
           method: 'POST',
           body: formData
         });
@@ -326,13 +326,13 @@ export const firebaseApi = {
       updatedAt: Timestamp.now(),
     };
 
-    // Upload new image to local backend if provided
+    // Upload new image to backend if provided
     if (imageFile) {
       try {
         const formData = new FormData();
         formData.append('photo', imageFile);
         
-        const response = await fetch('http://localhost:5000/api/court-cases/upload', {
+        const response = await fetch('https://savedieties.onrender.com/api/court-cases/upload', {
           method: 'POST',
           body: formData
         });
